@@ -1,0 +1,26 @@
+<!-- Source of Ti.UI.Webview -->
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Firebase</title>
+	<script type="text/javascript" src="js/firebase.js"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+var sFbRef = 'https://simpleshop-89516.firebaseio.com';
+var oFb = new Firebase(sFbRef);
+var sValue;
+
+oFb.on('child_added', function(e) {
+	var oMsg = e.val();
+	sValue = oMsg.value;
+	Ti.App.fireEvent('fireBaseCallback', {
+		message: sValue
+	});
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+
+<script src="https://www.gstatic.com/firebasejs/4.0.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyAuEOy7PmZKtgpiGZXkYziJos9SBcTDqsQ",
+    authDomain: "simpleshop-89516.firebaseapp.com",
+    databaseURL: "https://simpleshop-89516.firebaseio.com",
+    projectId: "simpleshop-89516",
+    storageBucket: "simpleshop-89516.appspot.com",
+    messagingSenderId: "224762672525"
+  };
+  firebase.initializeApp(config);
+</script>
