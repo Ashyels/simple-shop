@@ -35,6 +35,7 @@
     <input type="button" value="Buy Item" id="buyBtn" />
 	</br>
     <input type="button" value="Supply Item" id="supplyBtn" />
+    <input value="0" type="text" placeholder="value" id="valueTxt" />
 </div>
 
 <script type="text/javascript">
@@ -44,11 +45,24 @@
         var sB = $('#supplyBtn');
 		var database = firebase.database();
 		
-        sB.click(function() {
-			document.getElementById("itemTotal").innerHTML = 1;			
-			database.ref('item').set({
+        sB.click(function () {
+			
+			
+			// return firebase.database().ref('/item/').once('value').then(function(snapshot) {
+			//   var quantity = snapshot.val().quantity;
+			  	
+			  	document.getElementById("itemTotal").innerHTML =
+			parseInt(document.getElementById("valueTxt").value);
+			//   	database.ref('item/').set({
+			// 		name: 'laptop',
+			// 		quantity: quantity + parseInt(document.getElementById("valueTxt").value)
+			// 	});
+
+			// });	
+
+			database.ref('item/').set({
 				name: 'laptop',
-				quantity: 2
+				quantity: parseInt(document.getElementById("valueTxt").value)
 			});
 		});
 
