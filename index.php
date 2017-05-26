@@ -33,55 +33,125 @@
 
 <div>
     <input type="button" value="Buy Item" id="buyBtn" />
-	</br>
+	<br>
     <input type="button" value="Supply Item" id="supplyBtn" />
     <input value="0" type="text" placeholder="value" id="valueTxt" />
 </div>
 
 <?php
-/* DENGAN TRY CATCH */
-  try {
-	  	echo "
-	<script type=\"text/javascript\">
-		$(document).ready(function() {
-			var sQ = $('#supplyQuantity');
-			var bB = $('#buyBtn');
-			var sB = $('#supplyBtn');
-			var database = firebase.database();
-			
-			sB.click(function () {
-							
-				// return firebase.database().ref('/item/').once('value').then(function(snapshot) {
-				//   var quantity = snapshot.val().quantity;
+
+/* MENGGUNAKAN TRANSACTION() */
+	try {
+		echo "
+		<script type=\"text/javascript\">
+			$(document).ready(function() {
+				
+				// var wilmaRef = new Firebase('https://SampleChat.firebaseIO-demo.com/users/wilma');
+				// wilmaRef.transaction(function(currentData) {
+					// if (currentData === null) {
+						// return {name: {first: 'Wilma', last: 'Flintstone'} };
+					// } else {
+						// console.log('User wilma already exists.');
+						// return; // Abort the transaction.
+					// }
+				// }, function(error, committed, snapshot) {
+					// if (error)
+						// console.log('Transaction failed abnormally!', error);
+					// else if (!committed)
+						// console.log('We aborted the transaction (because wilma already exists).');
+					// else
+						// console.log('User wilma added!');
+					// console.log('Wilma\'s data: ', snapshot.val());
+				// });
+
+				var sQ = $('#supplyQuantity');
+				var bB = $('#buyBtn');
+				var sB = $('#supplyBtn');
+				var database = firebase.database();
+				
+				sB.click(function () {
+						
+					document.getElementById(\"itemTotal\").innerHTML =
+					parseInt(document.getElementById(\"valueTxt\").value);
 					
-				document.getElementById(\"itemTotal\").innerHTML =
-				parseInt(document.getElementById(\"valueTxt\").value);
-				//   	database.ref('item/').set({
-				// 		name: 'laptop',
-				// 		quantity: quantity + parseInt(document.getElementById(\"valueTxt\").value)
-				// 	});
+					var itemRef = firebase.database().ref();
 
-				// });	
-
-				database.ref('item/').set({
-					name: 'laptop',
-					quantity: parseInt(document.getElementById(\"valueTxt\").value)
+					itemRef.transaction(function(currentData) {
+						if (currentData === null) {
+							database.ref('item/').set({
+								name: 'laptop',
+								quantity: parseInt(document.getElementById(\"valueTxt\").value)
+							});
+							return {item: {name: 'laptop', quantity: parseInt(document.getElementById(\"valueTxt\").value) } };
+						} else {
+							console.log('quantity race condition.');
+							return; // Abort the transaction.
+						}
+					}, function(error, committed, snapshot) {
+						if (error)
+							console.log('Transaction failed abnormally!', error);
+						else if (!committed)
+							console.log('We aborted the transaction (because quantity race condition).');
+						else
+							console.log('User quantity added!');
+						console.log('Laptop\'s data: ', snapshot.val());
+					});
+						
 				});
-			});
 
-			bB.click(function writeUserData(name, quantity) {
-				firebase.database().ref('item/' + name).set({
-					quantity: quantity
-				});
 			});
-		});
-	</script>
-	";
+		</script>
+		";
 	 
 	} catch( Exception $e ) {
 		throw new Exception("Try later, sorry, too much guys other there, or it's not your day.");
 	}
+	
+	
+/* DENGAN TRY CATCH */
+/*	
+	try {
+		echo "
+		<script type=\"text/javascript\">
+			$(document).ready(function() {
+				var sQ = $('#supplyQuantity');
+				var bB = $('#buyBtn');
+				var sB = $('#supplyBtn');
+				var database = firebase.database();
+				
+				sB.click(function () {
+								
+					// return firebase.database().ref('/item/').once('value').then(function(snapshot) {
+					//   var quantity = snapshot.val().quantity;
+						
+					document.getElementById(\"itemTotal\").innerHTML =
+					parseInt(document.getElementById(\"valueTxt\").value);
+					//   	database.ref('item/').set({
+					// 		name: 'laptop',
+					// 		quantity: quantity + parseInt(document.getElementById(\"valueTxt\").value)
+					// 	});
 
+					// });	
+
+					database.ref('item/').set({
+						name: 'laptop',
+						quantity: parseInt(document.getElementById(\"valueTxt\").value)
+					});
+				});
+
+				bB.click(function writeUserData(name, quantity) {
+					firebase.database().ref('item/' + name).set({
+						quantity: quantity
+					});
+				});
+			});
+		</script>
+		";
+	 
+	} catch( Exception $e ) {
+		throw new Exception("Try later, sorry, too much guys other there, or it's not your day.");
+	}
+*/
 
 
 /* DENGAN MUTEX (MUTEX SUDAH TIDAK SUPPORT) */
@@ -172,7 +242,7 @@ Mutex::destroy($mutex);
 -->
 
 </body>
-
+<!--
 <script>
 function writeNewPost() {
 	// A post entry.
@@ -192,5 +262,5 @@ function writeNewPost() {
 	return firebase.database().ref().update(updates);
 }
 </script>
-
+-->
 </html>
