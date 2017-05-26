@@ -38,6 +38,103 @@
     <input value="0" type="text" placeholder="value" id="valueTxt" />
 </div>
 
+<?php
+/* DENGAN TRY CATCH */
+  try {
+	  	echo "
+	<script type=\"text/javascript\">
+		$(document).ready(function() {
+			var sQ = $('#supplyQuantity');
+			var bB = $('#buyBtn');
+			var sB = $('#supplyBtn');
+			var database = firebase.database();
+			
+			sB.click(function () {
+							
+				// return firebase.database().ref('/item/').once('value').then(function(snapshot) {
+				//   var quantity = snapshot.val().quantity;
+					
+				document.getElementById(\"itemTotal\").innerHTML =
+				parseInt(document.getElementById(\"valueTxt\").value);
+				//   	database.ref('item/').set({
+				// 		name: 'laptop',
+				// 		quantity: quantity + parseInt(document.getElementById(\"valueTxt\").value)
+				// 	});
+
+				// });	
+
+				database.ref('item/').set({
+					name: 'laptop',
+					quantity: parseInt(document.getElementById(\"valueTxt\").value)
+				});
+			});
+
+			bB.click(function writeUserData(name, quantity) {
+				firebase.database().ref('item/' + name).set({
+					quantity: quantity
+				});
+			});
+		});
+	</script>
+	";
+	 
+	} catch( Exception $e ) {
+		throw new Exception("Try later, sorry, too much guys other there, or it's not your day.");
+	}
+
+
+
+/* DENGAN MUTEX (MUTEX SUDAH TIDAK SUPPORT) */
+/*
+$mutex = Mutex::create();
+var_dump(Mutex::lock($mutex));
+
+	echo "
+	<script type=\"text/javascript\">
+		$(document).ready(function() {
+			var sQ = $('#supplyQuantity');
+			var bB = $('#buyBtn');
+			var sB = $('#supplyBtn');
+			var database = firebase.database();
+			
+			sB.click(function () {
+							
+				// return firebase.database().ref('/item/').once('value').then(function(snapshot) {
+				//   var quantity = snapshot.val().quantity;
+					
+				document.getElementById(\"itemTotal\").innerHTML =
+				parseInt(document.getElementById(\"valueTxt\").value);
+				//   	database.ref('item/').set({
+				// 		name: 'laptop',
+				// 		quantity: quantity + parseInt(document.getElementById(\"valueTxt\").value)
+				// 	});
+
+				// });	
+
+				database.ref('item/').set({
+					name: 'laptop',
+					quantity: parseInt(document.getElementById(\"valueTxt\").value)
+				});
+			});
+
+			bB.click(function writeUserData(name, quantity) {
+				firebase.database().ref('item/' + name).set({
+					quantity: quantity
+				});
+			});
+		});
+	</script>
+	";
+	
+var_dump(Mutex::unlock($mutex));
+Mutex::destroy($mutex);
+*/
+
+?>
+  
+  
+<!-- TANPA MUTEX -->
+<!--
 <script type="text/javascript">
     $(document).ready(function() {
         var sQ = $('#supplyQuantity');
@@ -46,12 +143,11 @@
 		var database = firebase.database();
 		
         sB.click(function () {
-			
-			
+						
 			// return firebase.database().ref('/item/').once('value').then(function(snapshot) {
 			//   var quantity = snapshot.val().quantity;
 			  	
-			  	document.getElementById("itemTotal").innerHTML =
+			document.getElementById("itemTotal").innerHTML =
 			parseInt(document.getElementById("valueTxt").value);
 			//   	database.ref('item/').set({
 			// 		name: 'laptop',
@@ -73,6 +169,8 @@
 		});
     });
 </script>
+-->
+
 </body>
 
 <script>
