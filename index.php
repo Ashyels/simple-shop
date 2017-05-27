@@ -30,9 +30,15 @@
 <div style="display:inline-block;">
 	<p id="itemTotal"></p>
 </div>
+<br>
+<div style="display:inline-block;">
+	<p id="buyTotal"></p>
+</div>
 
 <div>
     <input type="button" value="Buy Item" id="buyBtn" />
+	<br>
+	<input type="button" value="Show Item" id="showItem" />
 	<br>
     <input type="button" value="Supply Item" id="supplyBtn" />
     <input value="0" type="text" placeholder="value" id="valueTxt" />
@@ -66,23 +72,72 @@
 
 				var sQ = $('#supplyQuantity');
 				var bB = $('#buyBtn');
+				var item = $('#showItem');
 				var sB = $('#supplyBtn');
 				var database = firebase.database();
 				
 				sB.click(function () {
-						
-					document.getElementById(\"itemTotal\").innerHTML =
-					parseInt(document.getElementById(\"valueTxt\").value);
-					
-					var itemRef = firebase.database().ref();
 
+					var itemRef = firebase.database().ref();
 					itemRef.transaction(function(currentData) {
 						if (currentData === null) {
-							database.ref('item/').set({
-								name: 'laptop',
-								quantity: parseInt(document.getElementById(\"valueTxt\").value)
+							//var a =1;
+
+							database.ref('/item/').once('value').then(function(snapshot) {
+								var value = snapshot.val().quantity;
+								document.getElementById(\"itemTotal\").innerHTML =value + parseInt(document.getElementById(\"valueTxt\").value);
+								firebase.database().ref('item/').set({
+									name: 'laptop',
+									quantity: value + parseInt(document.getElementById(\"valueTxt\").value)
+								});
+
+								return {
+								item: {name: 'laptop', quantity: value+parseInt(document.getElementById(\"valueTxt\").value) } 
+							};
+								
 							});
-							return {item: {name: 'laptop', quantity: parseInt(document.getElementById(\"valueTxt\").value) } };
+						} else {
+							console.log('quantity race condition.');
+							return; // Abort the transaction.
+						}
+					}, function(error, committed, snapshot) {
+						if (error)
+							console.log('Transaction failed abnormally!', error);
+						else if (!committed)
+							console.log('We aborted the transaction (because quantity race condition).');
+						else
+							console.log('User quantity added!');
+						console.log('Laptop\'s data: ', snapshot.val());
+					});
+						
+				});
+
+				item.click(function () {
+					database.ref('/item/').once('value').then(function(snapshot) {
+					  var value = snapshot.val().quantity;
+					 	document.getElementById(\"itemTotal\").innerHTML =value;
+					});
+			
+				});
+
+				bB.click(function () {
+					
+					var itemRef = firebase.database().ref();
+					itemRef.transaction(function(currentData) {
+						if (currentData === null) {
+							database.ref('/item/').once('value').then(function(snapshot) {
+								var value = snapshot.val().quantity;
+								document.getElementById(\"itemTotal\").innerHTML =value - parseInt(document.getElementById(\"valueTxt\").value);
+								firebase.database().ref('item/').set({
+									name: 'laptop',
+									quantity: value - parseInt(document.getElementById(\"valueTxt\").value)
+								});
+
+								return {
+								item: {name: 'laptop', quantity: value - parseInt(document.getElementById(\"valueTxt\").value) } 
+							};
+								
+							});
 						} else {
 							console.log('quantity race condition.');
 							return; // Abort the transaction.
