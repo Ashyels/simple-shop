@@ -36,12 +36,19 @@
 </div>
 
 <div>
-    <input type="button" value="Buy Item" id="buyBtn" />
-	<br>
 	<input type="button" value="Show Item" id="showItem" />
 	<br>
-    <input type="button" value="Supply Item" id="supplyBtn" />
+	<br>
     <input value="0" type="text" placeholder="value" id="valueTxt" />
+	<p>Not Race Condition</p>
+    <input type="button" value="Buy Item" id="buyBtn" />
+    <input type="button" value="Supply Item" id="supplyBtn" />
+
+	<br>
+	<p>Race Condition</p>
+    <input type="button" value="Buy Item" id="buyBtnRC" />
+    <input type="button" value="Supply Item" id="supplyBtnRC" />
+	
 </div>
 
 <?php
@@ -52,28 +59,11 @@
 		<script type=\"text/javascript\">
 			$(document).ready(function() {
 				
-				// var wilmaRef = new Firebase('https://SampleChat.firebaseIO-demo.com/users/wilma');
-				// wilmaRef.transaction(function(currentData) {
-					// if (currentData === null) {
-						// return {name: {first: 'Wilma', last: 'Flintstone'} };
-					// } else {
-						// console.log('User wilma already exists.');
-						// return; // Abort the transaction.
-					// }
-				// }, function(error, committed, snapshot) {
-					// if (error)
-						// console.log('Transaction failed abnormally!', error);
-					// else if (!committed)
-						// console.log('We aborted the transaction (because wilma already exists).');
-					// else
-						// console.log('User wilma added!');
-					// console.log('Wilma\'s data: ', snapshot.val());
-				// });
-
-				var sQ = $('#supplyQuantity');
+				var sI = $('#showItem');
 				var bB = $('#buyBtn');
-				var item = $('#showItem');
 				var sB = $('#supplyBtn');
+				var bBRC = $('#buyBtnRC');
+				var sBRC = $('#supplyBtnRC');
 				var database = firebase.database();
 				
 				sB.click(function () {
@@ -81,20 +71,17 @@
 					var itemRef = firebase.database().ref();
 					itemRef.transaction(function(currentData) {
 						if (currentData === null) {
-							//var a =1;
-
 							database.ref('/item/').once('value').then(function(snapshot) {
 								var value = snapshot.val().quantity;
-								document.getElementById(\"itemTotal\").innerHTML =value + parseInt(document.getElementById(\"valueTxt\").value);
+								document.getElementById(\"itemTotal\").innerHTML = value + parseInt(document.getElementById(\"valueTxt\").value);
 								firebase.database().ref('item/').set({
 									name: 'laptop',
 									quantity: value + parseInt(document.getElementById(\"valueTxt\").value)
 								});
 
 								return {
-								item: {name: 'laptop', quantity: value+parseInt(document.getElementById(\"valueTxt\").value) } 
-							};
-								
+									item: {name: 'laptop', quantity: value+parseInt(document.getElementById(\"valueTxt\").value) } 
+								};
 							});
 						} else {
 							console.log('quantity race condition.');
@@ -112,10 +99,10 @@
 						
 				});
 
-				item.click(function () {
+				sI.click(function () {
 					database.ref('/item/').once('value').then(function(snapshot) {
 					  var value = snapshot.val().quantity;
-					 	document.getElementById(\"itemTotal\").innerHTML =value;
+					 	document.getElementById(\"itemTotal\").innerHTML = value;
 					});
 			
 				});
@@ -127,16 +114,18 @@
 						if (currentData === null) {
 							database.ref('/item/').once('value').then(function(snapshot) {
 								var value = snapshot.val().quantity;
-								document.getElementById(\"itemTotal\").innerHTML =value - parseInt(document.getElementById(\"valueTxt\").value);
-								firebase.database().ref('item/').set({
-									name: 'laptop',
-									quantity: value - parseInt(document.getElementById(\"valueTxt\").value)
-								});
-
+								if(value >= parseInt(document.getElementById(\"valueTxt\").value)){
+									document.getElementById(\"itemTotal\").innerHTML = value - parseInt(document.getElementById(\"valueTxt\").value);
+									firebase.database().ref('item/').set({
+										name: 'laptop',
+										quantity: value - parseInt(document.getElementById(\"valueTxt\").value)
+									});									
+								}
+								else
+									alert(\"Item Total is insufficient\");
 								return {
-								item: {name: 'laptop', quantity: value - parseInt(document.getElementById(\"valueTxt\").value) } 
-							};
-								
+									item: {name: 'laptop', quantity: value - parseInt(document.getElementById(\"valueTxt\").value) } 
+								};
 							});
 						} else {
 							console.log('quantity race condition.');
@@ -154,51 +143,39 @@
 						
 				});
 
-			});
-		</script>
-		";
-	 
-	} catch( Exception $e ) {
-		throw new Exception("Try later, sorry, too much guys other there, or it's not your day.");
-	}
-	
-	
-/* DENGAN TRY CATCH */
-/*	
-	try {
-		echo "
-		<script type=\"text/javascript\">
-			$(document).ready(function() {
-				var sQ = $('#supplyQuantity');
-				var bB = $('#buyBtn');
-				var sB = $('#supplyBtn');
-				var database = firebase.database();
+				sBRC.click(function () {
+					database.ref('/item/').once('value').then(function(snapshot) {
+						var value = snapshot.val().quantity;
+						document.getElementById(\"itemTotal\").innerHTML = value + parseInt(document.getElementById(\"valueTxt\").value);
+						firebase.database().ref('item/').set({
+							name: 'laptop',
+							quantity: value + parseInt(document.getElementById(\"valueTxt\").value)
+						});
+
+						return {
+							item: {name: 'laptop', quantity: value+parseInt(document.getElementById(\"valueTxt\").value) } 
+						};
+					});					
+				});
 				
-				sB.click(function () {
-								
-					// return firebase.database().ref('/item/').once('value').then(function(snapshot) {
-					//   var quantity = snapshot.val().quantity;
-						
-					document.getElementById(\"itemTotal\").innerHTML =
-					parseInt(document.getElementById(\"valueTxt\").value);
-					//   	database.ref('item/').set({
-					// 		name: 'laptop',
-					// 		quantity: quantity + parseInt(document.getElementById(\"valueTxt\").value)
-					// 	});
-
-					// });	
-
-					database.ref('item/').set({
-						name: 'laptop',
-						quantity: parseInt(document.getElementById(\"valueTxt\").value)
-					});
+				bBRC.click(function () {
+					database.ref('/item/').once('value').then(function(snapshot) {
+						var value = snapshot.val().quantity;
+						if(value >= parseInt(document.getElementById(\"valueTxt\").value)){
+							document.getElementById(\"itemTotal\").innerHTML = value - parseInt(document.getElementById(\"valueTxt\").value);
+							firebase.database().ref('item/').set({
+								name: 'laptop',
+								quantity: value - parseInt(document.getElementById(\"valueTxt\").value)
+							});									
+						}
+						else
+							alert(\"Item Total is insufficient\");
+						return {
+							item: {name: 'laptop', quantity: value - parseInt(document.getElementById(\"valueTxt\").value) } 
+						};		
+					});						
 				});
-
-				bB.click(function writeUserData(name, quantity) {
-					firebase.database().ref('item/' + name).set({
-						quantity: quantity
-					});
-				});
+				
 			});
 		</script>
 		";
@@ -206,116 +183,6 @@
 	} catch( Exception $e ) {
 		throw new Exception("Try later, sorry, too much guys other there, or it's not your day.");
 	}
-*/
-
-
-/* DENGAN MUTEX (MUTEX SUDAH TIDAK SUPPORT) */
-/*
-$mutex = Mutex::create();
-var_dump(Mutex::lock($mutex));
-
-	echo "
-	<script type=\"text/javascript\">
-		$(document).ready(function() {
-			var sQ = $('#supplyQuantity');
-			var bB = $('#buyBtn');
-			var sB = $('#supplyBtn');
-			var database = firebase.database();
-			
-			sB.click(function () {
-							
-				// return firebase.database().ref('/item/').once('value').then(function(snapshot) {
-				//   var quantity = snapshot.val().quantity;
-					
-				document.getElementById(\"itemTotal\").innerHTML =
-				parseInt(document.getElementById(\"valueTxt\").value);
-				//   	database.ref('item/').set({
-				// 		name: 'laptop',
-				// 		quantity: quantity + parseInt(document.getElementById(\"valueTxt\").value)
-				// 	});
-
-				// });	
-
-				database.ref('item/').set({
-					name: 'laptop',
-					quantity: parseInt(document.getElementById(\"valueTxt\").value)
-				});
-			});
-
-			bB.click(function writeUserData(name, quantity) {
-				firebase.database().ref('item/' + name).set({
-					quantity: quantity
-				});
-			});
-		});
-	</script>
-	";
-	
-var_dump(Mutex::unlock($mutex));
-Mutex::destroy($mutex);
-*/
-
 ?>
-  
-  
-<!-- TANPA MUTEX -->
-<!--
-<script type="text/javascript">
-    $(document).ready(function() {
-        var sQ = $('#supplyQuantity');
-        var bB = $('#buyBtn');
-        var sB = $('#supplyBtn');
-		var database = firebase.database();
-		
-        sB.click(function () {
-						
-			// return firebase.database().ref('/item/').once('value').then(function(snapshot) {
-			//   var quantity = snapshot.val().quantity;
-			  	
-			document.getElementById("itemTotal").innerHTML =
-			parseInt(document.getElementById("valueTxt").value);
-			//   	database.ref('item/').set({
-			// 		name: 'laptop',
-			// 		quantity: quantity + parseInt(document.getElementById("valueTxt").value)
-			// 	});
-
-			// });	
-
-			database.ref('item/').set({
-				name: 'laptop',
-				quantity: parseInt(document.getElementById("valueTxt").value)
-			});
-		});
-
-		bB.click(function writeUserData(name, quantity) {
-			firebase.database().ref('item/' + name).set({
-				quantity: quantity
-			});
-		});
-    });
-</script>
--->
-
 </body>
-<!--
-<script>
-function writeNewPost() {
-	// A post entry.
-	var postData = {
-	name: 'laptop',
-	quantity: '3'
-	};
-
-	// Get a key for a new Post.
-	var newPostKey = firebase.database().ref().child('posts').push().key;
-
-	// Write the new post's data simultaneously in the posts list and the user's post list.
-	var updates = {};
-	updates['/posts/' + newPostKey] = postData;
-	updates['/user-posts/' + uid + '/' + newPostKey] = postData;
-
-	return firebase.database().ref().update(updates);
-}
-</script>
--->
 </html>
