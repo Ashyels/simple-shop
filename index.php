@@ -83,6 +83,8 @@
 									item: {name: 'laptop', quantity: value+parseInt(document.getElementById(\"valueTxt\").value) } 
 								};
 							});
+							
+							alert(\"Supply Success!\");
 						} else {
 							console.log('quantity race condition.');
 							return; // Abort the transaction.
@@ -96,7 +98,6 @@
 							console.log('User quantity added!');
 						console.log('Laptop\'s data: ', snapshot.val());
 					});
-						
 				});
 
 				sI.click(function () {
@@ -104,11 +105,9 @@
 					  var value = snapshot.val().quantity;
 					 	document.getElementById(\"itemTotal\").innerHTML = value;
 					});
-			
 				});
 
 				bB.click(function () {
-					
 					var itemRef = firebase.database().ref();
 					itemRef.transaction(function(currentData) {
 						if (currentData === null) {
@@ -119,7 +118,8 @@
 									firebase.database().ref('item/').set({
 										name: 'laptop',
 										quantity: value - parseInt(document.getElementById(\"valueTxt\").value)
-									});									
+									});
+									alert(\"Buy Success!\");
 								}
 								else
 									alert(\"Item Total is insufficient\");
@@ -139,8 +139,7 @@
 						else
 							console.log('User quantity added!');
 						console.log('Laptop\'s data: ', snapshot.val());
-					});
-						
+					});						
 				});
 
 				sBRC.click(function () {
@@ -156,6 +155,7 @@
 							item: {name: 'laptop', quantity: value+parseInt(document.getElementById(\"valueTxt\").value) } 
 						};
 					});					
+					alert(\"Supply Success!\");
 				});
 				
 				bBRC.click(function () {
@@ -167,6 +167,7 @@
 								name: 'laptop',
 								quantity: value - parseInt(document.getElementById(\"valueTxt\").value)
 							});									
+							alert(\"Buy Success!\");
 						}
 						else
 							alert(\"Item Total is insufficient\");
