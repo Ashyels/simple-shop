@@ -5,7 +5,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>Firebase</title>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-
+	<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
 	<script src="https://www.gstatic.com/firebasejs/4.0.0/firebase.js"></script>
 
 <script>
@@ -24,32 +25,34 @@
 	</head>
 
 <body>
-<div style="display:inline-block;">
-	<p>Total Item = </p>
-</div>
-<div style="display:inline-block;">
-	<p id="itemTotal"></p>
-</div>
-<br>
-<div style="display:inline-block;">
-	<p id="buyTotal"></p>
-</div>
+
+<div style="display:inline-block;">	<p>[Laptop] Total Item = </p>	</div>
+<div style="display:inline-block;">	<p id="laptopItemTotal"></p>	</div> <!-- menampilkan total laptop dari firebase -->
+<div> <input value="0" type="text" placeholder="value" id="laptopValueTxt" />	</div>
+
+<div style="display:inline-block;">	<p>[Ipad] Total Item = </p>	</div>
+<div style="display:inline-block;">	<p id="ipadItemTotal"></p>	</div> <!-- menampilkan total ipad dari firebase -->
+<div> <input value="0" type="text" placeholder="value" id="ipadValueTxt" />	</div>
+
+<div style="display:inline-block;">	<p>[Camera] Total Item = </p>	</div>
+<div style="display:inline-block;">	<p id="cameraItemTotal"></p>	</div> <!-- menampilkan total camera dari firebase -->
+<div> <input value="0" type="text" placeholder="value" id="cameraValueTxt" />	</div>
+
+
 
 <div>
+	<br>
 	<input type="button" value="Show Item" id="showItem" />
 	<br>
 	<br>
-    <input value="0" type="text" placeholder="value" id="valueTxt" />
-	<p>Not Race Condition</p>
+	<p>Transaction</p>
     <input type="button" value="Buy Item" id="buyBtn" />
     <input type="button" value="Supply Item" id="supplyBtn" />
 
 	<br>
-	<p>Race Condition</p>
-    <input type="button" value="Buy Item" id="buyBtnRC" />
-    <input type="button" value="Supply Item" id="supplyBtnRC" />
-	
+
 </div>
+
 
 <?php
 
@@ -62,8 +65,6 @@
 				var sI = $('#showItem');
 				var bB = $('#buyBtn');
 				var sB = $('#supplyBtn');
-				var bBRC = $('#buyBtnRC');
-				var sBRC = $('#supplyBtnRC');
 				var database = firebase.database();
 				
 				sB.click(function () {
@@ -71,16 +72,39 @@
 					var itemRef = firebase.database().ref();
 					itemRef.transaction(function(currentData) {
 						if (currentData === null) {
-							database.ref('/item/').once('value').then(function(snapshot) {
+							database.ref('/item/laptop').once('value').then(function(snapshot) {
 								var value = snapshot.val().quantity;
-								document.getElementById(\"itemTotal\").innerHTML = value + parseInt(document.getElementById(\"valueTxt\").value);
-								firebase.database().ref('item/').set({
-									name: 'laptop',
-									quantity: value + parseInt(document.getElementById(\"valueTxt\").value)
+								document.getElementById(\"laptopItemTotal\").innerHTML = value + parseInt(document.getElementById(\"laptopValueTxt\").value);
+								firebase.database().ref('item/laptop').update({
+									quantity: value + parseInt(document.getElementById(\"laptopValueTxt\").value)
 								});
 
 								return {
-									item: {name: 'laptop', quantity: value+parseInt(document.getElementById(\"valueTxt\").value) } 
+									laptop: {quantity: value + parseInt(document.getElementById(\"laptopValueTxt\").value) } 
+								};
+							});
+							
+							database.ref('/item/ipad').once('value').then(function(snapshot) {
+								var value = snapshot.val().quantity;
+								document.getElementById(\"ipadItemTotal\").innerHTML = value + parseInt(document.getElementById(\"ipadValueTxt\").value);
+								firebase.database().ref('item/ipad').update({
+									quantity: value + parseInt(document.getElementById(\"ipadValueTxt\").value)
+								});
+
+								return {
+									ipad: {quantity: value + parseInt(document.getElementById(\"ipadValueTxt\").value) } 
+								};
+							});
+							
+							database.ref('/item/camera').once('value').then(function(snapshot) {
+								var value = snapshot.val().quantity;
+								document.getElementById(\"cameraItemTotal\").innerHTML = value + parseInt(document.getElementById(\"cameraValueTxt\").value);
+								firebase.database().ref('item/camera').update({
+									quantity: value + parseInt(document.getElementById(\"cameraValueTxt\").value)
+								});
+
+								return {
+									camera: {quantity: value + parseInt(document.getElementById(\"cameraValueTxt\").value) } 
 								};
 							});
 							
@@ -93,90 +117,113 @@
 						if (error)
 							console.log('Transaction failed abnormally!', error);
 						else if (!committed)
-							console.log('We aborted the transaction (because quantity race condition).');
+						{
+							// console.log('We aborted the transaction');
+						}
 						else
 							console.log('User quantity added!');
-						console.log('Laptop\'s data: ', snapshot.val());
 					});
 				});
 
 				sI.click(function () {
-					database.ref('/item/').once('value').then(function(snapshot) {
+					database.ref('/item/laptop').once('value').then(function(snapshot) {
 					  var value = snapshot.val().quantity;
-					 	document.getElementById(\"itemTotal\").innerHTML = value;
+					 	document.getElementById(\"laptopItemTotal\").innerHTML = value;
+					});
+					database.ref('/item/ipad').once('value').then(function(snapshot) {
+					  var value = snapshot.val().quantity;
+					 	document.getElementById(\"ipadItemTotal\").innerHTML = value;
+					});
+					database.ref('/item/camera').once('value').then(function(snapshot) {
+					  var value = snapshot.val().quantity;
+					 	document.getElementById(\"cameraItemTotal\").innerHTML = value;
 					});
 				});
 
 				bB.click(function () {
-					var itemRef = firebase.database().ref();
-					itemRef.transaction(function(currentData) {
-						if (currentData === null) {
-							database.ref('/item/').once('value').then(function(snapshot) {
-								var value = snapshot.val().quantity;
-								if(value >= parseInt(document.getElementById(\"valueTxt\").value)){
-									document.getElementById(\"itemTotal\").innerHTML = value - parseInt(document.getElementById(\"valueTxt\").value);
-									firebase.database().ref('item/').set({
-										name: 'laptop',
-										quantity: value - parseInt(document.getElementById(\"valueTxt\").value)
-									});
-									alert(\"Buy Success!\");
-								}
-								else
-									alert(\"Item Total is insufficient\");
-								return {
-									item: {name: 'laptop', quantity: value - parseInt(document.getElementById(\"valueTxt\").value) } 
-								};
+					
+					// var value = database.ref('/item/laptop').once('value').then(function(snapshot) {
+							// return snapshot.val().quantity;
+						// });
+					var count = 0;
+					var valLaptop = 10;
+					var valIpad = 10;
+					var valCamera = 10;
+					
+					var ref = new Firebase(\"https://simpleshop-89516.firebaseio.com/item\");
+					ref.orderByChild(\"quantity\").on(\"child_added\", function(snapshot) {
+						var itemName = snapshot.key();
+						var itemData = snapshot.val();
+						if(itemName == \"laptop\")
+							if(itemData.quantity >= parseInt(document.getElementById(\"laptopValueTxt\").value))
+							{
+								count = count + 1;
+								valLaptop = itemData.quantity - parseInt(document.getElementById(\"ipadValueTxt\").value);
+								// console.log(count);
+							}
+						if(itemName == \"ipad\")
+							if(itemData.quantity >= parseInt(document.getElementById(\"ipadValueTxt\").value))
+							{
+								count = count + 1;
+								valIpad = itemData.quantity - parseInt(document.getElementById(\"ipadValueTxt\").value);
+								// console.log(count);
+							}
+						if(itemName == \"camera\")
+							if(itemData.quantity >= parseInt(document.getElementById(\"cameraValueTxt\").value))
+							{
+								count = count + 1;
+								valCamera = itemData.quantity - parseInt(document.getElementById(\"ipadValueTxt\").value);								
+								// console.log(count);
+							}
+						if(count == 3)
+						{
+							var updatedUserData = {};
+							updatedUserData['item/laptop/'] = {
+								quantity: valLaptop
+							};
+							updatedUserData['item/ipad/'] = {
+								quantity: valIpad
+							};
+							updatedUserData['item/camera/'] = {
+								quantity: valCamera
+							};
+
+							database.ref().update(updatedUserData, function(error) {
+							if (error) {
+								console.log(\"Error updating data:\", error);
+							}
 							});
-						} else {
-							console.log('quantity race condition.');
-							return; // Abort the transaction.
 						}
-					}, function(error, committed, snapshot) {
-						if (error)
-							console.log('Transaction failed abnormally!', error);
-						else if (!committed)
-							console.log('We aborted the transaction (because quantity race condition).');
-						else
-							console.log('User quantity added!');
-						console.log('Laptop\'s data: ', snapshot.val());
-					});						
-				});
 
-				sBRC.click(function () {
-					database.ref('/item/').once('value').then(function(snapshot) {
-						var value = snapshot.val().quantity;
-						document.getElementById(\"itemTotal\").innerHTML = value + parseInt(document.getElementById(\"valueTxt\").value);
-						firebase.database().ref('item/').set({
-							name: 'laptop',
-							quantity: value + parseInt(document.getElementById(\"valueTxt\").value)
-						});
+					});
 
-						return {
-							item: {name: 'laptop', quantity: value+parseInt(document.getElementById(\"valueTxt\").value) } 
-						};
-					});					
-					alert(\"Supply Success!\");
-				});
-				
-				bBRC.click(function () {
-					database.ref('/item/').once('value').then(function(snapshot) {
-						var value = snapshot.val().quantity;
-						if(value >= parseInt(document.getElementById(\"valueTxt\").value)){
-							document.getElementById(\"itemTotal\").innerHTML = value - parseInt(document.getElementById(\"valueTxt\").value);
-							firebase.database().ref('item/').set({
-								name: 'laptop',
-								quantity: value - parseInt(document.getElementById(\"valueTxt\").value)
-							});									
-							alert(\"Buy Success!\");
+						if(count == 3)
+						{
+							var updatedUserData = {};
+							updatedUserData['item/laptop/'] = {
+								quantity: valLaptop
+							};
+							updatedUserData['item/ipad/'] = {
+								quantity: valIpad
+							};
+							updatedUserData['item/camera/'] = {
+								quantity: valCamera
+							};
+
+							database.ref().update(updatedUserData, function(error) {
+							if (error) {
+								console.log(\"Error updating data:\", error);
+							}
+							});
+
+							document.getElementById(\"laptopItemTotal\").innerHTML = valLaptop;
+							document.getElementById(\"ipadItemTotal\").innerHTML = valIpad;
+							document.getElementById(\"cameraItemTotal\").innerHTML = valCamera;
+							alert(\"Transaksi Berhasil!\");
 						}
-						else
-							alert(\"Item Total is insufficient\");
-						return {
-							item: {name: 'laptop', quantity: value - parseInt(document.getElementById(\"valueTxt\").value) } 
-						};		
-					});						
+						else if(count < 3)
+							alert(\"Transaksi Gagal!\");
 				});
-				
 			});
 		</script>
 		";
